@@ -16,11 +16,17 @@ class DateTime:
         self.update_time()
 
     def update_time(self):
+        # get the current time
         current_time = time.strftime("%I:%M %p")  # format time
-        if current_time[0] == '0':  # remove leading zero for the hours 1-9
+        # remove leading zero for the hours 1-9
+        if current_time[0] == '0':
             current_time = current_time[1:]
+        # get the current date
         current_date = time.strftime("%A, %B %d, %Y")  # format date
+
+        # adjust labels to display date and time
         self.date_label.config(text=current_date)
         self.time_label.config(text=current_time)
+        
         # schedule function to be called again after 1 second
         self.time_label.after(1000, self.update_time)
