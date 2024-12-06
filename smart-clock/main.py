@@ -1,6 +1,7 @@
 import tkinter as tk
 from date_time import DateTime
 from to_do_list import ToDoList
+import ttkbootstrap as ttk
 
 def show_date_time():
     # remove all widgets and display the date and time page
@@ -17,7 +18,7 @@ def show_to_do_list():
 def main():
     # make root global so the functions can access it
     global root
-    root = tk.Tk()
+    root = ttk.Window(themename="litera")
     root.title("Smart Clock")
     root.geometry("1200x900")
 
