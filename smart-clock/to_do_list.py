@@ -80,23 +80,27 @@ class ToDoList:
         self.create_task_entry = tk.Entry(self.task_entry_frame, width=40)
         self.create_task_entry.pack(pady=5)
 
+        # create frame for the start time entries
+        self.start_time_frame = tk.Frame(self.task_entry_frame)
+        self.start_time_frame.pack(pady=5)
+
         # create spinboxes for start hour and minute
-        self.start_time_label = tk.Label(self.task_entry_frame, text="Start Time", font=("Helvetica", 16))
+        self.start_time_label = tk.Label(self.start_time_frame, text="Start Time", font=("Helvetica", 16))
         self.start_time_label.pack(pady=5)
-        self.start_hour_spinbox = tk.Spinbox(self.task_entry_frame, from_=1, to=12, width=3, format="%2.0f")
+        self.start_hour_spinbox = tk.Spinbox(self.start_time_frame, from_=1, to=12, width=3, format="%2.0f")
         self.start_hour_spinbox.pack(side=tk.LEFT, padx=5)
-        self.start_minute_spinbox = tk.Spinbox(self.task_entry_frame, from_=0, to=59, width=3, format="%02.0f")
+        self.start_minute_spinbox = tk.Spinbox(self.start_time_frame, from_=0, to=59, width=3, format="%02.0f")
         self.start_minute_spinbox.pack(side=tk.LEFT, padx=5)
 
         # create AM/PM radio box (limited to one selection by the 'variable' parameter)
         self.time_period = tk.StringVar(value="AM")
-        self.am_radio_button = tk.Radiobutton(self.task_entry_frame, text="AM", variable=self.time_period, value="AM")
-        self.pm_radio_button = tk.Radiobutton(self.task_entry_frame, text="PM", variable=self.time_period, value="PM")
+        self.am_radio_button = tk.Radiobutton(self.start_time_frame, text="AM", variable=self.time_period, value="AM")
+        self.pm_radio_button = tk.Radiobutton(self.start_time_frame, text="PM", variable=self.time_period, value="PM")
         self.am_radio_button.pack(side=tk.LEFT, padx=5)
         self.pm_radio_button.pack(side=tk.LEFT, padx=5)
 
         # create date selector
-        self.date_entry = ttk.DateEntry(self.task_entry_frame)
+        self.date_entry = ttk.DateEntry(self.start_time_frame)
         self.date_entry.pack(side=tk.LEFT, padx=5)
 
         # add task to to do list button
@@ -129,27 +133,31 @@ class ToDoList:
             self.task_update_entry.insert(0, task[DESCRIPTION_KEY]) # put the selected task in the entry in case of edit for typos
             self.task_update_entry.pack(pady=5)
 
+            # create frame for the start time entries
+            self.start_time_frame = tk.Frame(self.task_entry_frame)
+            self.start_time_frame.pack(pady=5)
+
             # create spinboxes for start hour and minute
-            self.start_time_label = tk.Label(self.task_entry_frame, text="Start Time", font=("Helvetica", 16))
+            self.start_time_label = tk.Label(self.start_time_frame, text="Start Time", font=("Helvetica", 16))
             self.start_time_label.pack(pady=5)
-            self.start_hour_spinbox = tk.Spinbox(self.task_entry_frame, from_=1, to=12, width=3, format="%2.0f")
+            self.start_hour_spinbox = tk.Spinbox(self.start_time_frame, from_=1, to=12, width=3, format="%2.0f")
             self.start_hour_spinbox.delete(0, tk.END) # remove what is in the spinbox
             self.start_hour_spinbox.insert(0, task[START_TIME_KEY].split(":")[0]) # get the previously saved hour
             self.start_hour_spinbox.pack(side=tk.LEFT, padx=5)
-            self.start_minute_spinbox = tk.Spinbox(self.task_entry_frame, from_=0, to=59, width=3, format="%02.0f")
+            self.start_minute_spinbox = tk.Spinbox(self.start_time_frame, from_=0, to=59, width=3, format="%02.0f")
             self.start_minute_spinbox.delete(0, tk.END) # remove what is in the spinbox
             self.start_minute_spinbox.insert(0, task[START_TIME_KEY].split(":")[1]) # get the previously saved minute
             self.start_minute_spinbox.pack(side=tk.LEFT, padx=5)
 
             # create AM/PM radio box (limited to one selection by the 'variable' parameter)
             self.time_period = tk.StringVar(value=task[TIME_PERIOD_KEY]) # get the previously saved time period
-            self.am_radio_button = tk.Radiobutton(self.task_entry_frame, text="AM", variable=self.time_period, value="AM")
-            self.pm_radio_button = tk.Radiobutton(self.task_entry_frame, text="PM", variable=self.time_period, value="PM")
+            self.am_radio_button = tk.Radiobutton(self.start_time_frame, text="AM", variable=self.time_period, value="AM")
+            self.pm_radio_button = tk.Radiobutton(self.start_time_frame, text="PM", variable=self.time_period, value="PM")
             self.am_radio_button.pack(side=tk.LEFT, padx=5)
             self.pm_radio_button.pack(side=tk.LEFT, padx=5)
 
             # create date selector
-            self.date_entry = ttk.DateEntry(self.task_entry_frame)
+            self.date_entry = ttk.DateEntry(self.start_time_frame)
             self.date_entry.entry.delete(0, tk.END) # remove what is currently as date (will be today's date by default)
             self.date_entry.entry.insert(0, task[DATE_KEY]) # get the previously saved date
             self.date_entry.pack(side=tk.LEFT, padx=5)
@@ -242,4 +250,4 @@ class ToDoList:
         self.time_label.config(text=current_time)
 
         # schedule function to be called again after 1 second
-        self.time_label.after(1000, self.update_time) 
+        self.time_label.after(1000, self.update_time)
