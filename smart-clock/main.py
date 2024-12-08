@@ -2,6 +2,7 @@ import tkinter as tk
 from date_time import DateTime
 from to_do_list import ToDoList
 import ttkbootstrap as ttk
+import sqlite3
 
 def show_date_time():
     # remove all widgets and display the date and time page
@@ -14,6 +15,30 @@ def show_to_do_list():
     for widget in root.winfo_children():
         widget.pack_forget()
     to_do_list = ToDoList(root, show_date_time)
+
+def create_tables():
+    # create database or connect to it
+    conn = sqlite3.connect("smart_clock.db")
+
+    # create cursor
+    cursor = conn.cursor()
+
+    # create to do list table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS tasks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        description TEXT,
+        start_time TEXT,
+        time_period TEXT,
+        date TEXT
+    )
+    """)
+
+    # commit changes
+    conn.commit()
+
+    # close connection
+    conn.close()
 
 def main():
     # make root global so the functions can access it
@@ -28,4 +53,5 @@ def main():
     root.mainloop()
 
 if __name__ == "__main__":
+    create_tables()
     main()
