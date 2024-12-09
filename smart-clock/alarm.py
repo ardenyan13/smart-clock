@@ -53,14 +53,14 @@ class Alarm:
         self.create_alarm_button.pack(side=tk.LEFT, padx=20)
 
         # delete alarm button
-        self.delete_alarm_button = tk.Button(self.alarm_buttons_frame, text="Delete Task", font=("Helvetica", 16), command=self.delete_alarm)
+        self.delete_alarm_button = tk.Button(self.alarm_buttons_frame, text="Delete Alarm", font=("Helvetica", 16), command=self.delete_alarm)
         self.delete_alarm_button.pack(side=tk.LEFT, padx=20)
 
         # create a frame for new alarm and edit alarm entry area
         self.alarm_entry_frame = tk.Frame(root)
         self.alarm_entry_frame.pack(pady=10)
 
-        # self.update_to_do_list()
+        self.update_alarm_list()
     
     def show_create_alarm(self):
         # clear the entry area
@@ -96,7 +96,7 @@ class Alarm:
         self.date_entry.pack(side=tk.LEFT, padx=5)
 
         # add task to to do list button
-        self.create_task_button = tk.Button(self.alarm_entry_frame, text="Add Task", command=None)
+        self.create_task_button = tk.Button(self.alarm_entry_frame, text="Add Alarm", command=self.add_alarm)
         self.create_task_button.pack(pady=5)
 
         # cancel create task button
@@ -128,8 +128,11 @@ class Alarm:
         formatted_date = date_obj.strftime("%Y-%m-%d")
 
         # check if the alarm time fields are filled
-        if alarm_hour and time_period and date:
-            alarm_id = self.add_alarm_to_db(description, formatted_alarm_time, time_period, formatted_date)
+        if formatted_alarm_time and date:
+            if not description:
+                self.add_alarm_to_db("", formatted_alarm_time, time_period, formatted_date)
+            else:
+                self.add_alarm_to_db(description, formatted_alarm_time, time_period, formatted_date)
             self.update_alarm_list() # update the alarm list to display the new alarm
             self.clear_alarm_entry_frame() # clear the entry area
 
@@ -189,59 +192,52 @@ class Alarm:
         # schedule function to be called again after 1 second
         self.time_label.after(1000, self.update_time)
     
-    def add_alarm_to_db(self):
-        pass
+    def add_alarm_to_db(self, description, alarm_time, time_period, date):
+        # create database or connect to it
+        conn = sqlite3.connect("smart_clock.db")
+
+        # create cursor
+        cursor = conn.cursor()
+
+        # insert into alarms table
+        cursor.execute("""INSERT INTO alarms (description, alarm_time, time_period, date)
+                       VALUES (?, ?, ?, ?)
+                       """, (description, alarm_time, time_period, date))
+        
+        # get the inserted alarm's id
+        alarm_id = cursor.lastrowid
+
+        # commit changes
+        conn.commit()
+
+        # close connection
+        conn.close()
+
+        return alarm_id
 
     def get_alarms_from_db(self):
-        pass
+        conn = sqlite3.connect("smart_clock.db")
+        cursor = conn.cursor()
 
-    def delete_alarm_from_db(self):
-        pass
+        # query the alarms table
+        cursor.execute("SELECT * FROM alarms ORDER BY date, alarm_time, description")
 
-    # def add_task_to_db(self, description, start_time, time_period, date):
-    #     # create database or connect to it
-    #     conn = sqlite3.connect("smart_clock.db")
+        # get all the alarms (will return a list of tuples)
+        alarms = cursor.fetchall()
+        for alarm in alarms:
+            print(alarm)
 
-    #     # create cursor
-    #     cursor = conn.cursor()
+        conn.commit()
+        conn.close()
 
-    #     # insert into tasks table
-    #     cursor.execute("""INSERT INTO tasks (description, start_time, time_period, date)
-    #                    VALUES (?, ?, ?, ?)
-    #                    """, (description, start_time, time_period, date))
-        
-    #     # get the inserted task's id
-    #     task_id = cursor.lastrowid
+        return alarms
 
-    #     # commit changes
-    #     conn.commit()
+    def delete_alarm_from_db(self, alarm_id):
+        conn = sqlite3.connect("smart_clock.db")
+        cursor = conn.cursor()
 
-    #     # close connection
-    #     conn.close()
+        # query the tasks table
+        cursor.execute("DELETE FROM alarms WHERE id = ?", (alarm_id,))
 
-    #     return task_id
-    
-    # def get_tasks_from_db(self):
-    #     conn = sqlite3.connect("smart_clock.db")
-    #     cursor = conn.cursor()
-
-    #     # query the tasks table
-    #     cursor.execute("SELECT * FROM tasks ORDER BY date, start_time")
-
-    #     # get all the tasks (will return a list of tuples)
-    #     tasks = cursor.fetchall()
-
-    #     conn.commit()
-    #     conn.close()
-
-    #     return tasks
-    
-    # def delete_task_from_db(self, task_id):
-    #     conn = sqlite3.connect("smart_clock.db")
-    #     cursor = conn.cursor()
-
-    #     # query the tasks table
-    #     cursor.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
-
-    #     conn.commit()
-    #     conn.close()
+        conn.commit()
+        conn.close()

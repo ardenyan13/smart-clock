@@ -40,6 +40,17 @@ def create_tables():
     )
     """)
 
+    # create alarm table
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS alarms (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        description TEXT,
+        alarm_time TEXT,
+        time_period TEXT,
+        date TEXT
+    )
+    """)
+
     # commit changes
     conn.commit()
 
