@@ -2,9 +2,7 @@ import tkinter as tk
 import time
 
 class DateTime:
-    def __init__(self, root, show_to_do_list):
-        self.show_to_do_list = show_to_do_list # show to do list function
-
+    def __init__(self, root, show_to_do_list, show_alarms):
         # create date label
         self.date_label = tk.Label(root, text="", font=("Helvetica", 24))
         self.date_label.pack(pady=10)
@@ -17,11 +15,11 @@ class DateTime:
         self.update_time()
 
         # create to do list button that will switch to the to do list page
-        self.to_do_list_button = tk.Button(root, text="To Do List", font=("Helvetica", 20), command=self.show_to_do_list)
+        self.to_do_list_button = tk.Button(root, text="To Do List", font=("Helvetica", 20), command=show_to_do_list)
         self.to_do_list_button.pack(pady=10)
 
         # create alarms button that will switch to the alarms page
-        self.alarm_button = tk.Button(root, text="Alarms", font=("Helvetica", 20))
+        self.alarm_button = tk.Button(root, text="Alarms", font=("Helvetica", 20), command=show_alarms)
         self.alarm_button.pack(pady=10)
 
         # create pomodoro timer button that will switch to the pomodoro timer page
