@@ -4,11 +4,6 @@ import ttkbootstrap as ttk
 import sqlite3
 from datetime import datetime
 
-DESCRIPTION_KEY = "description"
-START_TIME_KEY = "start_time"
-TIME_PERIOD_KEY = "time_period"
-DATE_KEY = "date"
-
 class ToDoList:
     def __init__(self, root, show_date_time):
         # frame for date and time at the top of the page
