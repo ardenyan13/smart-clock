@@ -1,5 +1,6 @@
 import tkinter as tk
 import time
+from widget import Widget
 
 class DateTime:
     def __init__(self, root, show_to_do_list, show_alarms):
@@ -26,9 +27,8 @@ class DateTime:
         self.pomodoro_button = tk.Button(root, text="Pomodoro Timer", font=("Helvetica", 20))
         self.pomodoro_button.pack(pady=10)
 
-        # create knowledge and wellness label
-        self.knowledge_label = tk.Label(root, text="", font=("Helvetica", 20))
-        self.knowledge_label.pack(pady=10)
+        # create random task and word definitin widget
+        self.random_widget = Widget(root)
 
     def update_time(self):
         # get the current time
