@@ -2,6 +2,7 @@ import tkinter as tk
 from date_time import DateTime
 from to_do_list import ToDoList
 from alarm import Alarm
+from pomodoro import Pomodoro
 import ttkbootstrap as ttk
 import sqlite3
 
@@ -9,7 +10,7 @@ def show_date_time():
     # remove all widgets and display the date and time page
     for widget in root.winfo_children():
         widget.pack_forget()
-    date_time = DateTime(root, show_to_do_list, show_alarms)
+    date_time = DateTime(root, show_to_do_list, show_alarms, show_pomodoro)
 
 def show_to_do_list():
     # remove all widgets and display the to do list page
@@ -21,6 +22,11 @@ def show_alarms():
     for widget in root.winfo_children():
         widget.pack_forget()
     alarm = Alarm(root, show_date_time)
+
+def show_pomodoro():
+    for widget in root.winfo_children():
+        widget.pack_forget()
+    pomodoro = Pomodoro(root, show_date_time)
 
 def create_tables():
     # create database or connect to it

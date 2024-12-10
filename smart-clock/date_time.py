@@ -3,7 +3,7 @@ import time
 from widget import Widget
 
 class DateTime:
-    def __init__(self, root, show_to_do_list, show_alarms):
+    def __init__(self, root, show_to_do_list, show_alarms, show_pomodoro):
         # create date label
         self.date_label = tk.Label(root, text="", font=("Helvetica", 24))
         self.date_label.pack(pady=10)
@@ -24,7 +24,7 @@ class DateTime:
         self.alarm_button.pack(pady=10)
 
         # create pomodoro timer button that will switch to the pomodoro timer page
-        self.pomodoro_button = tk.Button(root, text="Pomodoro Timer", font=("Helvetica", 20))
+        self.pomodoro_button = tk.Button(root, text="Pomodoro Timer", font=("Helvetica", 20), command=show_pomodoro)
         self.pomodoro_button.pack(pady=10)
 
         # create random task and word definitin widget
