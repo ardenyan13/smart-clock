@@ -168,11 +168,11 @@ class Alarm:
 
             # check if the alarm has a description (the string to be displayed differs)
             if (alarm[1]):
-                full_task = f"{alarm[1]} | {formatted_time} {alarm[3]} | {formatted_date}" 
+                full_alarm = f"{alarm[1]} | {formatted_time} {alarm[3]} | {formatted_date}" 
             else:
-                full_task = f"{formatted_time} {alarm[3]} | {formatted_date}"
+                full_alarm = f"{formatted_time} {alarm[3]} | {formatted_date}"
             
-            self.alarms_listbox.insert(tk.END, full_task)
+            self.alarms_listbox.insert(tk.END, full_alarm)
 
     def update_time(self):
         # get the current time
@@ -224,8 +224,6 @@ class Alarm:
 
         # get all the alarms (will return a list of tuples)
         alarms = cursor.fetchall()
-        for alarm in alarms:
-            print(alarm)
 
         conn.commit()
         conn.close()

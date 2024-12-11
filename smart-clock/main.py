@@ -3,28 +3,40 @@ from date_time import DateTime
 from to_do_list import ToDoList
 from alarm import Alarm
 from pomodoro import Pomodoro
+from background_alarm import BackgroundAlarm
 import ttkbootstrap as ttk
 import sqlite3
+
+# import os
+# os.environ['SDL_AUDIODRIVER'] = 'pulse'
 
 def show_date_time():
     # remove all widgets and display the date and time page
     for widget in root.winfo_children():
+        if isinstance(widget, tk.Toplevel):
+            continue
         widget.pack_forget()
     date_time = DateTime(root, show_to_do_list, show_alarms, show_pomodoro)
 
 def show_to_do_list():
     # remove all widgets and display the to do list page
     for widget in root.winfo_children():
+        if isinstance(widget, tk.Toplevel):
+            continue
         widget.pack_forget()
     to_do_list = ToDoList(root, show_date_time)
 
 def show_alarms():
     for widget in root.winfo_children():
+        if isinstance(widget, tk.Toplevel):
+            continue
         widget.pack_forget()
     alarm = Alarm(root, show_date_time)
 
 def show_pomodoro():
     for widget in root.winfo_children():
+        if isinstance(widget, tk.Toplevel):
+            continue
         widget.pack_forget()
     pomodoro = Pomodoro(root, show_date_time)
 
@@ -53,7 +65,8 @@ def create_tables():
         description TEXT,
         alarm_time TEXT,
         time_period TEXT,
-        date TEXT
+        date TEXT,
+        triggered BOOLEAN DEFAULT 0
     )
     """)
 
@@ -69,6 +82,9 @@ def main():
     root = ttk.Window(themename="litera")
     root.title("Smart Clock")
     root.geometry("1200x900")
+
+    # initialize the background alarm checker
+    background_alarm = BackgroundAlarm(root)
 
     # initally show the date and time page
     show_date_time()
