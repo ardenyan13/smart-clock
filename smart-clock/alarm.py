@@ -113,29 +113,32 @@ class Alarm:
         # get the text from the create alarm entry box
         description = self.create_alarm_entry.get()
         time_period = self.time_period.get()
-        alarm_hour = int(self.alarm_hour_spinbox.get())
-
-        # format the time in 24 hour to store in database
-        if time_period == "PM" and alarm_hour != 12:
-            alarm_hour += 12
-        if time_period == "AM" and alarm_hour == 12:
-            alarm_hour = 0
-        formatted_alarm_time = f"{alarm_hour:02}:{self.alarm_minute_spinbox.get()}"
-
+        alarm_hour = self.alarm_hour_spinbox.get()
+        alarm_minute = self.alarm_minute_spinbox.get()
         date = self.date_entry.entry.get()
 
-        # format the date in YYYY-MM-DD in database
-        date_obj = datetime.strptime(date, "%m/%d/%y")
-        formatted_date = date_obj.strftime("%Y-%m-%d")
+        if is_hour_valid(alarm_hour) and is_minute_valid(alarm_minute) and is_date_valid(date):
+            alarm_hour = int(alarm_hour)
 
-        # check if the alarm time fields are filled
-        if formatted_alarm_time and date:
-            if not description:
-                self.add_alarm_to_db("", formatted_alarm_time, time_period, formatted_date)
-            else:
-                self.add_alarm_to_db(description, formatted_alarm_time, time_period, formatted_date)
-            self.update_alarm_list() # update the alarm list to display the new alarm
-            self.clear_alarm_entry_frame() # clear the entry area
+            # format the time in 24 hour to store in database
+            if time_period == "PM" and alarm_hour != 12:
+                alarm_hour += 12
+            if time_period == "AM" and alarm_hour == 12:
+                alarm_hour = 0
+            formatted_alarm_time = f"{alarm_hour:02}:{alarm_minute}"
+
+            # format the date in YYYY-MM-DD in database
+            date_obj = datetime.strptime(date, "%m/%d/%y")
+            formatted_date = date_obj.strftime("%Y-%m-%d")
+
+            # check if the alarm time fields are filled
+            if formatted_alarm_time and date:
+                if not description:
+                    self.add_alarm_to_db("", formatted_alarm_time, time_period, formatted_date)
+                else:
+                    self.add_alarm_to_db(description, formatted_alarm_time, time_period, formatted_date)
+                self.update_alarm_list() # update the alarm list to display the new alarm
+                self.clear_alarm_entry_frame() # clear the entry area
 
     def delete_alarm(self):
         # get the index of the selected alarm(s)
