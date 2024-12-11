@@ -1,6 +1,8 @@
 import tkinter as tk
 import time
+import ttkbootstrap as ttk
 from widget import Widget
+import sqlite3
 
 class DateTime:
     def __init__(self, root, show_to_do_list, show_alarms, show_pomodoro):
@@ -14,6 +16,11 @@ class DateTime:
 
         # call update_time() to display the correct info
         self.update_time()
+
+        # create a shabbat mode toggle check button
+        self.shabbat_mode_var = tk.BooleanVar(value=self.get_curr_shabbat_mode()) # variable to hold the current shabbat mode setting
+        self.shabbat_mode_button = ttk.Checkbutton(root, text="Shabbat Mode", style="Roundtoggle.Toolbutton", variable=self.shabbat_mode_var, command=self.change_shabbat_mode)
+        self.shabbat_mode_button.pack(pady=10)
 
         # create to do list button that will switch to the to do list page
         self.to_do_list_button = tk.Button(root, text="To Do List", font=("Helvetica", 20), command=show_to_do_list)
@@ -47,3 +54,35 @@ class DateTime:
 
         # schedule function to be called again after 1 second
         self.time_label.after(1000, self.update_time)
+    
+    def change_shabbat_mode(self):
+        # get the state from button and save it to database
+        state = self.shabbat_mode_var.get()
+        self.save_shabbat_mode(state)
+    
+    def save_shabbat_mode(self, state):
+        conn = sqlite3.connect("smart_clock.db")
+        cursor = conn.cursor()
+
+        # delete the old shabbat mode and then insert the new state
+        cursor.execute("DELETE FROM shabbat")
+        cursor.execute("INSERT INTO shabbat (enabled) VALUES (?)", (state,))
+        
+        conn.commit()
+        conn.close()
+    
+    def get_curr_shabbat_mode(self):
+        conn = sqlite3.connect("smart_clock.db")
+        cursor = conn.cursor()
+
+        # query the shabbat mode state
+        cursor.execute("SELECT enabled FROM shabbat")
+        result = cursor.fetchone()
+
+        conn.commit()
+        conn.close()
+
+        if (result):
+            return bool(result[0])
+        else:
+            return False

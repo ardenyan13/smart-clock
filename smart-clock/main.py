@@ -70,6 +70,16 @@ def create_tables():
     )
     """)
 
+    # create shabbat mode tabel
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS shabbat (
+            enabled BOOLEAN DEFAULT 0
+    )
+    """)
+
+    # create an initial default shabbat mode if this is the first time running main
+    cursor.execute("INSERT INTO shabbat (enabled) SELECT 0 WHERE NOT EXISTS (SELECT 1 FROM shabbat)")
+
     # commit changes
     conn.commit()
 
