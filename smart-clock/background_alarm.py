@@ -66,16 +66,16 @@ class BackgroundAlarm:
 
         alarm_label.config(text=f"Alarm!\n{full_alarm}")
 
-        # create dismiss button
-        dismiss_button = tk.Button(popup, text="Dismiss", command=lambda: self.dismiss_alarm(popup))
-        dismiss_button.pack(pady=5)
+        # create silence button
+        silence_button = tk.Button(popup, text="Silence Alarm", command=lambda: self.silence_alarm(popup))
+        silence_button.pack(pady=5)
 
         # bind the event for window close button
-        popup.protocol("WM_DELETE_WINDOW", lambda: self.dismiss_alarm(popup))
+        popup.protocol("WM_DELETE_WINDOW", popup.destroy)
 
-        # if shabbat mode is enabled automatically dismiss the alarm popup after some time
+        # if shabbat mode is enabled automatically silence the alarm popup after some time
         if self.shabbat_mode_enabled:
-            popup.after(5000, lambda: self.dismiss_alarm(popup))
+            popup.after(5000, lambda: self.silence_alarm(popup))
 
     def play_alarm_sound(self):
         pygame.mixer.init()
@@ -84,10 +84,9 @@ class BackgroundAlarm:
         while self.alarm_ringing:
             time.sleep(1)
 
-    def dismiss_alarm(self, popup):
+    def silence_alarm(self, popup):
         self.alarm_ringing = False
         pygame.mixer.music.stop()
-        popup.destroy()
 
     def check_alarms(self):
         while True:
@@ -132,4 +131,5 @@ class BackgroundAlarm:
             return False
     
     def update_shabbat_mode(self):
+        # if shabbat mode has been changed from home page change it here
         self.shabbat_mode_enabled = self.get_curr_shabbat_mode()
