@@ -4,9 +4,12 @@ import ttkbootstrap as ttk
 from widget import Widget
 import sqlite3
 from background_alarm import BackgroundAlarm
+import threading
 
 class DateTime:
     def __init__(self, root, show_to_do_list, show_alarms, show_pomodoro):
+        self.root = root
+
         # initialize the background alarm checker
         self.background_alarm = BackgroundAlarm(root)
 
@@ -25,6 +28,11 @@ class DateTime:
         self.shabbat_mode_var = tk.BooleanVar(value=self.get_curr_shabbat_mode()) # variable to hold the current shabbat mode setting
         self.shabbat_mode_button = ttk.Checkbutton(root, text="Shabbat Mode", style="Roundtoggle.Toolbutton", variable=self.shabbat_mode_var, command=self.change_shabbat_mode)
         self.shabbat_mode_button.pack(pady=10)
+
+        # create a loading spinner to ensure Shabbat mode changes are reflected in db
+        self.loading_spinner = ttk.Progressbar(root, mode="indeterminate")
+        self.loading_spinner.pack(pady=10)
+        self.loading_spinner.pack_forget() # hide the loading spinner at the start
 
         # create to do list button that will switch to the to do list page
         self.to_do_list_button = tk.Button(root, text="To Do List", font=("Helvetica", 20), command=show_to_do_list)
@@ -60,12 +68,18 @@ class DateTime:
         self.time_label.after(1000, self.update_time)
     
     def change_shabbat_mode(self):
-        # get the state from button and save it to database
-        state = self.shabbat_mode_var.get()
-        self.save_shabbat_mode(state)
+        # disable the check button
+        self.shabbat_mode_button.config(state="disabled")
+        self.loading_spinner.pack()
+        self.loading_spinner.start()
 
-        # let the background process know the shabbat mode was changed
-        self.background_alarm.update_shabbat_mode()
+        # disable all other buttons
+        self.to_do_list_button.config(state="disabled")
+        self.alarm_button.config(state="disabled")
+        self.pomodoro_button.config(state="disabled")
+
+        # update Shabbat mode in sa separate thread
+        threading.Thread(target=self.update_shabbat_mode_db).start()
     
     def save_shabbat_mode(self, state):
         conn = sqlite3.connect("smart_clock.db")
@@ -93,3 +107,31 @@ class DateTime:
             return bool(result[0])
         else:
             return False
+    
+    def update_shabbat_mode_db(self):
+        # get the state from button and save it to database
+        state = self.shabbat_mode_var.get()
+        self.save_shabbat_mode(state)
+
+        time.sleep(0.5)
+
+        # remove the loading spinenr when done
+        self.root.after(0, self.on_shabbat_mode_updated)
+
+    def on_shabbat_mode_updated(self):
+        # read back from the db to confirm change
+        new_state = self.get_curr_shabbat_mode()
+        self.shabbat_mode_var.set(new_state)
+
+        # reactivate the buttons
+        self.shabbat_mode_button.config(state="normal")
+        self.to_do_list_button.config(state="normal")
+        self.alarm_button.config(state="normal")
+        self.pomodoro_button.config(state="normal")
+
+        # stop and remove the spinner
+        self.loading_spinner.stop()
+        self.loading_spinner.pack_forget()
+
+        # let the background process know the shabbat mode was changed
+        self.background_alarm.update_shabbat_mode()
