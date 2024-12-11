@@ -3,6 +3,7 @@ import time
 import ttkbootstrap as ttk
 import sqlite3
 from datetime import datetime
+from validate_input import is_hour_valid, is_minute_valid, is_date_valid
 
 class ToDoList:
     def __init__(self, root, show_date_time):
@@ -112,26 +113,29 @@ class ToDoList:
         # get the text from the create task entry box
         description = self.create_task_entry.get()
         time_period = self.time_period.get()
-        start_hour = int(self.start_hour_spinbox.get())
-
-        # format the time in 24 hour to store in database
-        if time_period == "PM" and start_hour != 12:
-            start_hour += 12
-        if time_period == "AM" and start_hour == 12:
-            start_hour = 0
-        start_time = f"{start_hour:02}:{self.start_minute_spinbox.get()}"
-
+        start_hour = self.start_hour_spinbox.get()
+        start_minute = self.start_minute_spinbox.get()
         date = self.date_entry.entry.get()
 
-        # format the date in YYYY-MM-DD in database
-        date_obj = datetime.strptime(date, "%m/%d/%y")
-        formatted_date = date_obj.strftime("%Y-%m-%d")
+        if is_hour_valid(start_hour) and is_minute_valid(start_minute) and is_date_valid(date):
+            start_hour = int(start_hour)
 
-        # check if all fields are filled
-        if description != "" and start_time and time_period and date:
-            task_id = self.add_task_to_db(description, start_time, time_period, formatted_date)
-            self.update_to_do_list() # update the to do list to display the new task
-            self.clear_task_entry_frame() # clear the entry area
+            # format the time in 24 hour to store in database
+            if time_period == "PM" and start_hour != 12:
+                start_hour += 12
+            if time_period == "AM" and start_hour == 12:
+                start_hour = 0
+            start_time = f"{start_hour:02}:{start_minute}"
+
+            # format the date in YYYY-MM-DD in database
+            date_obj = datetime.strptime(date, "%m/%d/%y")
+            formatted_date = date_obj.strftime("%Y-%m-%d")
+
+            # check if all fields are filled
+            if description != "" and start_time and time_period and date:
+                task_id = self.add_task_to_db(description, start_time, time_period, formatted_date)
+                self.update_to_do_list() # update the to do list to display the new task
+                self.clear_task_entry_frame() # clear the entry area
 
     
     def delete_task(self):
