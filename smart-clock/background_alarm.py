@@ -13,6 +13,9 @@ class BackgroundAlarm:
         # set the alarm ringing boolean to false
         self.alarm_ringing = False
 
+        # get the shabbat mode current state
+        self.shabbat_mode_enabled = self.get_curr_shabbat_mode()
+
         # start the alarm checking thread
         self.start_alarm_checker()
     
@@ -67,13 +70,17 @@ class BackgroundAlarm:
         dismiss_button = tk.Button(popup, text="Dismiss", command=lambda: self.dismiss_alarm(popup))
         dismiss_button.pack(pady=5)
 
-        # Bind the event for window close button (X button)
+        # bind the event for window close button
         popup.protocol("WM_DELETE_WINDOW", lambda: self.dismiss_alarm(popup))
+
+        # if shabbat mode is enabled automatically dismiss the alarm popup after some time
+        if self.shabbat_mode_enabled:
+            popup.after(5000, lambda: self.dismiss_alarm(popup))
 
     def play_alarm_sound(self):
         pygame.mixer.init()
         pygame.mixer.music.load("alarm.wav")
-        pygame.mixer.music.play(-1)  # The -1 parameter makes the sound loop indefinitely while `self.alarm_ringing` is True
+        pygame.mixer.music.play(-1)  # The -1 parameter makes the sound loop indefinitely while self.alarm_ringing is True
         while self.alarm_ringing:
             time.sleep(1)
 
@@ -84,22 +91,45 @@ class BackgroundAlarm:
 
     def check_alarms(self):
         while True:
+            # get the current time
             curr_time = datetime.now().strftime("%Y-%m-%d %H:%M")
             
+            # compare each alarm in database to the current time
             for alarm in self.get_alarms_from_db():
+                # format the alarm time in db
                 alarm_time = f"{alarm[4]} {alarm[2]}"
                 if curr_time == alarm_time and not alarm[5]:
-                    self.mark_alarm_triggered(alarm[0])  # Mark alarm as triggered
+                    self.set_alarm_triggered(alarm[0])  # set the alarm as triggered in the db
                     self.show_alarm_popup(alarm)
                     break
             time.sleep(1)
     
-    def mark_alarm_triggered(self, alarm_id):
+    def set_alarm_triggered(self, alarm_id):
         conn = sqlite3.connect("smart_clock.db")
         cursor = conn.cursor()
+        # update alarm triggered column in db
         cursor.execute("UPDATE alarms SET triggered = 1 WHERE id = ?", (alarm_id,))
         conn.commit()
         conn.close()
     
     def start_alarm_checker(self):
         threading.Thread(target=self.check_alarms, daemon=True).start()
+    
+    def get_curr_shabbat_mode(self):
+        conn = sqlite3.connect("smart_clock.db")
+        cursor = conn.cursor()
+
+        # query the shabbat mode state
+        cursor.execute("SELECT enabled FROM shabbat")
+        result = cursor.fetchone()
+
+        conn.commit()
+        conn.close()
+
+        if (result):
+            return bool(result[0])
+        else:
+            return False
+    
+    def update_shabbat_mode(self):
+        self.shabbat_mode_enabled = self.get_curr_shabbat_mode()

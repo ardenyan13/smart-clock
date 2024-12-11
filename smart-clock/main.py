@@ -93,9 +93,6 @@ def main():
     root.title("Smart Clock")
     root.geometry("1200x900")
 
-    # initialize the background alarm checker
-    background_alarm = BackgroundAlarm(root)
-
     # initally show the date and time page
     show_date_time()
     

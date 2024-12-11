@@ -3,9 +3,13 @@ import time
 import ttkbootstrap as ttk
 from widget import Widget
 import sqlite3
+from background_alarm import BackgroundAlarm
 
 class DateTime:
     def __init__(self, root, show_to_do_list, show_alarms, show_pomodoro):
+        # initialize the background alarm checker
+        self.background_alarm = BackgroundAlarm(root)
+
         # create date label
         self.date_label = tk.Label(root, text="", font=("Helvetica", 24))
         self.date_label.pack(pady=10)
@@ -59,6 +63,9 @@ class DateTime:
         # get the state from button and save it to database
         state = self.shabbat_mode_var.get()
         self.save_shabbat_mode(state)
+
+        # let the background process know the shabbat mode was changed
+        self.background_alarm.update_shabbat_mode()
     
     def save_shabbat_mode(self, state):
         conn = sqlite3.connect("smart_clock.db")
@@ -67,7 +74,7 @@ class DateTime:
         # delete the old shabbat mode and then insert the new state
         cursor.execute("DELETE FROM shabbat")
         cursor.execute("INSERT INTO shabbat (enabled) VALUES (?)", (state,))
-        
+
         conn.commit()
         conn.close()
     
