@@ -43,7 +43,7 @@ class BackgroundAlarm:
         # create alarm popup window
         popup = tk.Toplevel(self.root)
         popup.title("Alarm")
-        popup.geometry("300x150")
+        popup.geometry("600x450")
         
         # create label
         alarm_label = tk.Label(popup, text="", font=("Helvetica", 20))
