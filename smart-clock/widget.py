@@ -1,11 +1,16 @@
 import tkinter as tk
 import sqlite3
-# import requests
+import requests
 from datetime import datetime
+import threading
+from dotenv import load_dotenv
+import os
 
 class Widget:
     def __init__(self, root):
-        # create knowledge and wellness label
+        load_dotenv()
+
+        # create random task label
         self.main_label = tk.Label(root, text="", font=("Helvetica", 16))
         self.main_label.pack(pady=30)
 
@@ -13,23 +18,29 @@ class Widget:
         self.update_main_label()
 
     def update_main_label(self):
-        # get a random task from the database
+        # start api call in separate thread
+        threading.Thread(target=self.get_task_and_update_label).start()
+
+    def get_task_and_update_label(self):
+        # get a random task from the db
         task = self.get_task_from_db()
 
+        # update label on main thread
+        self.main_label.after(0, self.update_label_text, task)
+    
+    def update_label_text(self, task):
         # update label
         if task:
-            self.main_label.config(text=f"One of your upcoming tasks:\n\n{task}")
+            text = f"One of your upcoming tasks:\n\n{task}"
         else:
-            self.main_label.config(text="No upcoming tasks")
+            text = "No upcoming tasks"
 
-        # schedule function to be called again after 20 seconds
-        self.main_label.after(20000, self.get_task_from_db)
+        # text += f"\n\n{self.get_random_word()}"
 
-        # random word definition here
-        # # get the definition of a random word and update the label
-        # self.get_definition(task)
-        # # schedule function to be called again after 20 seconds
-        # self.main_label.after(20000, self.update_main_label)
+        self.main_label.config(text=text)
+
+        # schedule function to be called again after 10 seconds
+        self.main_label.after(10000, self.update_main_label)
 
     def get_task_from_db(self):
         # create database or connect to it
@@ -64,32 +75,36 @@ class Widget:
         else:
             return ""
 
-    # def get_definition(self, task):
-    #     # random word url
-    #     word_url = "https://random-word-api.herokuapp.com/word"
+    def get_random_word(self):
+        # random word url
+        word_url = "https://word-generator2.p.rapidapi.com/"
 
-    #     # definition url
-    #     definition_url = "https://api.dictionaryapi.dev/api/v2/entries/en/"
+        querystring = {"count":"1"}
+
+        headers = {
+	        "x-rapidapi-key": os.getenv("RAPIDAPI_KEY"), # get the api key from enviornment variable
+	        "x-rapidapi-host": "word-generator2.p.rapidapi.com"
+        }
+
+        # definition url
+        definition_url = "https://api.dictionaryapi.dev/api/v2/entries/en/"
         
-    #     try:
-    #         word_response = requests.get(word_url)
-    #         word_response.raise_for_status()
-    #         word_data = word_response.json() # json response example: ["reduplicate"]
-    #         word = word_data[0] # get the word
+        try:
+            word_response = requests.get(word_url, headers=headers, params=querystring)
+            word_response.raise_for_status()
+            word_data = word_response.json()
+            words = word_data["body"] # get the words
+            word = words[0] # get the first word
 
-    #         definition_response = requests.get(definition_url + word) # append the word to the definition api call
-    #         definition_response.raise_for_status()
-    #         definition_data = definition_response.json()
-    #         definition = definition_data[0]["meanings"][0]["definitions"][0]["definition"]
+            definition_response = requests.get(definition_url + word) # append the word to the definition api call
+            definition_response.raise_for_status()
+            definition_data = definition_response.json()
+            definition = definition_data[0]["meanings"][0]["definitions"][0]["definition"]
 
-    #         # update label
-    #         if task:
-    #             combined_text = f"One of your upcoming tasks:\n\n{task}\n\nWord: {word}\n Definition: {definition}"
-    #         else:
-    #             combined_text = f"No upcoming tasks\n\n{word}: {definition}"
-            
-    #         # update the label
-    #         self.main_label.config(text=combined_text)
+            if len(definition) > 50:
+                return f"{word}: {definition[0:50]}\n{definition[50:]}"
 
-    #     except requests.RequestException as e:
-    #         self.main_label.config(text="")
+            return f"{word}: {definition}"
+        
+        except Exception as e:
+            return ""
