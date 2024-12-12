@@ -23,7 +23,7 @@ class Pomodoro:
 
         # crate button to go back to home page
         self.date_time_button = tk.Button(root, text="Home", font=("Helvetica", 20), command=show_date_time)
-        self.date_time_button.pack()
+        self.date_time_button.pack(pady=10)
 
     def update_time(self):
         # get the current time
